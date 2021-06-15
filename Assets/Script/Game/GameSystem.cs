@@ -39,6 +39,7 @@ public class GameSystem : MonoBehaviour
             isMusicStart=true;
             //play Music
             MusicObj.GetComponent<AudioSource>().Play();
+            StartCoroutine(AudioPlayFinished(MusicObj.GetComponent<AudioSource>().clip.length));
         }
     }
 
@@ -116,6 +117,13 @@ public class GameSystem : MonoBehaviour
         }
     }
 
+    private IEnumerator AudioPlayFinished(float time)
+    {
+        yield return new WaitForSeconds(time);
+
+        Debug.Log("結束");
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -127,6 +135,7 @@ public class GameSystem : MonoBehaviour
                 isMusicStart=true;
                 //play music
                 MusicObj.GetComponent<AudioSource>().Play();
+                StartCoroutine(AudioPlayFinished(MusicObj.GetComponent<AudioSource>().clip.length));
             }
         }
         if(isMapDone)
@@ -134,8 +143,6 @@ public class GameSystem : MonoBehaviour
 
         if(total_time*1000>=next_time)
         {
-            Debug.Log(total_time);
-            Debug.Log(next_time);
             genHitObj();
             setNextObj();
         }

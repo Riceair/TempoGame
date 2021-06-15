@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using System;
 
 public class HitObj : MonoBehaviour
 {
@@ -8,6 +10,8 @@ public class HitObj : MonoBehaviour
     private const int RED_CODE=1;
     private const int BLUE_CODE=2;
     private float speed;
+
+    private GameObject RedHitSound, BlueHitSound, HitNum, MissNum;
 
     // Start is called before the first frame update
     void Start()
@@ -17,6 +21,11 @@ public class HitObj : MonoBehaviour
         float distance = Vector3.Distance(generate_position,hit_position);
         speed = distance/2f; //距離除以時間(秒)
 
+        RedHitSound = GameObject.Find("RedHitSound");
+        BlueHitSound = GameObject.Find("BlueHitSound");
+        HitNum = GameObject.Find("HitNum");
+        MissNum = GameObject.Find("MissNum");
+
         if(name=="HitObj_R(Clone)")
             myCode=RED_CODE;
         else if(name=="HitObj_B(Clone)")
@@ -24,28 +33,50 @@ public class HitObj : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
-        transform.Translate(0,0,-Time.deltaTime*speed);
+        transform.Translate(0,0,-Time.fixedDeltaTime*speed);
     }
 
     private void CheckTrigger(Collider other)
     {
+
         if(other.name=="HitRed")
         {
             if(myCode==RED_CODE)
-                Debug.Log("Red");
+            {
+                RedHitSound.GetComponent<AudioSource>().Play();
+                recordScore(true);
+            }
             else
-                Debug.Log("Hit Fail");
+                recordScore(false);
             Destroy(gameObject);
         }
         else if(other.name=="HitBlue")
         {
             if(myCode==BLUE_CODE)
-                Debug.Log("Blue");
+            {
+                BlueHitSound.GetComponent<AudioSource>().Play();
+                recordScore(true);
+            }
             else
-                Debug.Log("Hit Fail");
+                recordScore(false);
             Destroy(gameObject);
+        }
+    }
+
+    private void recordScore(bool isTP)
+    {
+        int num=0;
+        if(!isTP)
+        {
+            num = Convert.ToInt32(MissNum.GetComponent<Text>().text) + 1;
+            MissNum.GetComponent<Text>().text = Convert.ToString(num);
+        }
+        else
+        {
+            num = Convert.ToInt32(HitNum.GetComponent<Text>().text) + 1;
+            HitNum.GetComponent<Text>().text = Convert.ToString(num);
         }
     }
 
@@ -54,7 +85,7 @@ public class HitObj : MonoBehaviour
         if(other.name=="DestroyPoint")
         {
             Destroy(gameObject);
-            Debug.Log("Miss Fail");
+            recordScore(false);
         }
         CheckTrigger(other);
     }
