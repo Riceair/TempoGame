@@ -43,7 +43,6 @@ public class ScrollController : MonoBehaviour
         }
         else
         {
-            //沒歌曲退出(有緣一定做)
             Application.Quit();
         }
     }
@@ -75,9 +74,11 @@ public class ScrollController : MonoBehaviour
         //rect.sizeDelta = new Vector2(rect.sizeDelta.x, lists.Count * itemHeight);
     }
 
-    // Update is called once per frame
     void Update()
     {
-        
+        if(Input.GetKey (KeyCode.Escape)) //按下Esc退出遊戲
+        {
+            Application.Quit();
+        }
     }
 }

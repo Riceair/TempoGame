@@ -4,10 +4,11 @@ using UnityEngine;
 using System.IO;
 using System;
 using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
 
 public class GameSystem : MonoBehaviour
 {
-    public GameObject hitObj_R, hitObj_B, GeneratePoint, MusicObj;
+    public GameObject hitObj_R, hitObj_B, GeneratePoint, MusicObj, FinishText;
     private Queue<int> hit_timing = new Queue<int>(); //打擊時間
     private Queue<int> hit_obj = new Queue<int>(); //打擊物件
     private int next_time = 0; //紀錄下一個打擊時間
@@ -18,10 +19,12 @@ public class GameSystem : MonoBehaviour
     private string audio_path="\\audio.wav";
     private string map_path="\\4";
     private bool isMapDone = false;
+    private bool isMusicDone = false;
 
     // Start is called before the first frame update
     void Start()
     {
+        FinishText.SetActive(false);
         string root_path = GameObject.Find("GameParm").GetComponent<GameParm>().getSongPath();
         audio_path = root_path+audio_path;
         map_path = root_path+map_path;
@@ -121,14 +124,20 @@ public class GameSystem : MonoBehaviour
     {
         yield return new WaitForSeconds(time);
 
-        Debug.Log("結束");
+        isMusicDone=true;
     }
 
     // Update is called once per frame
     void Update()
     {
         total_time+=Time.deltaTime;
-        if(!isMusicStart)
+
+        if(Input.GetKey (KeyCode.Escape)) //按下Esc退出遊戲
+        {
+            SceneManager.LoadScene("Menu");
+        }
+
+        if(!isMusicStart) //第一個打擊物件時間點小於兩秒，音樂需延後播放
         {
             if(total_time*1000>=wait_time)
             {
@@ -138,8 +147,13 @@ public class GameSystem : MonoBehaviour
                 StartCoroutine(AudioPlayFinished(MusicObj.GetComponent<AudioSource>().clip.length));
             }
         }
-        if(isMapDone)
+        if(isMapDone && !isMusicDone) //是否結束的判定
             return;
+        else if(isMapDone && isMusicDone)
+        {
+            FinishText.SetActive(true);
+            return;
+        }
 
         if(total_time*1000>=next_time)
         {

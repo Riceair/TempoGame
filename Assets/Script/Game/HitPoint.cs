@@ -31,6 +31,6 @@ public class HitPoint : MonoBehaviour
 
     IEnumerator UpDateDelay(){
         gameObject.GetComponent<Renderer>().material.SetColor("_EmissionColor",original_color*1.5f);
-        yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSeconds(0.15f);
     }
 }
