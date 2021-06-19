@@ -14,8 +14,9 @@ public class GameSystem : MonoBehaviour
     private int next_time = 0; //紀錄下一個打擊時間
     private int next_obj = 0; //紀錄下一個打擊物件
     private float total_time = 0; //紀錄遊戲的時間
-    private int wait_time = 0; //紀錄音樂播放延遲的時間
-    private bool isMusicStart = false;
+    //private int wait_time = 0; //紀錄音樂播放延遲的時間
+    // private bool isMusicLoad = false;
+    // private bool isMusicStart = false;
     private string audio_path="\\audio.wav";
     private string map_path="\\4";
     private bool isMapDone = false;
@@ -31,43 +32,48 @@ public class GameSystem : MonoBehaviour
         StartCoroutine(GetAudioClip(audio_path)); //載入音樂
         loadMap(map_path);
         setNextObj(); //初始化第一個打擊點
-        
-        if(wait_time!=0) //播放音樂時間需延遲 --> 第一個打擊點需提前產生
-        {
-            genHitObj();
-            setNextObj();
-        }
-        else
-        {
-            isMusicStart=true;
-            //play Music
-            MusicObj.GetComponent<AudioSource>().Play();
-            StartCoroutine(AudioPlayFinished(MusicObj.GetComponent<AudioSource>().clip.length));
-        }
+
+        //isMusicStart=true;
+        // //play Music
+        // MusicObj.GetComponent<AudioSource>().Play();
+        // StartCoroutine(AudioPlayFinished(MusicObj.GetComponent<AudioSource>().clip.length));
+        // if(wait_time!=0) //播放音樂時間需延遲 --> 第一個打擊點需提前產生
+        // {
+        //     genHitObj();
+        //     setNextObj();
+        // }
+        // else
+        // {
+        //     isMusicStart=true;
+        //     //play Music
+        //     MusicObj.GetComponent<AudioSource>().Play();
+        //     StartCoroutine(AudioPlayFinished(MusicObj.GetComponent<AudioSource>().clip.length));
+        // }
     }
 
     private void loadMap(string path)
     {
         StreamReader sr;
         string str;
-        bool isFirstSet = false;
-        int first=0; //儲存第一個時間
+        //bool isFirstSet = false;
+        //int first=0; //儲存第一個時間
 
         using (sr=new StreamReader(path))
         {
             while ((str = sr.ReadLine()) != null)
             {
                 //由於物件飛向打擊點，所以兩秒前出現的打擊點需要校正，並且要記錄歌曲延後播放時間
-                int timing = Convert.ToInt32(str.Split(' ')[0])-2000; //物件飛向打擊點需兩秒
-                if(!isFirstSet) //紀錄第一個時間點(方便兩秒前的節奏校正)
-                {
-                    isFirstSet = true;
-                    first = timing;
-                    if(first<0) //紀錄歌曲延後播放時間
-                        wait_time=first*(-1);
-                }
-                if(timing<0)
-                    timing = timing-first;
+                int timing = Convert.ToInt32(str.Split(' ')[0])-1000; //物件飛向打擊點需兩秒
+                if(timing<0) continue;
+                // if(!isFirstSet) //紀錄第一個時間點(方便兩秒前的節奏校正)
+                // {
+                //     isFirstSet = true;
+                //     first = timing;
+                //     if(first<0) //紀錄歌曲延後播放時間
+                //         wait_time=first*(-1);
+                // }
+                // if(timing<0)
+                //     timing = timing-first;
 
                 hit_timing.Enqueue(timing);
                 hit_obj.Enqueue(Convert.ToInt32(str.Split(' ')[1]));
@@ -115,7 +121,8 @@ public class GameSystem : MonoBehaviour
             {
                 AudioClip myClip = DownloadHandlerAudioClip.GetContent(www);
                 MusicObj.GetComponent<AudioSource>().clip = myClip;
-                //MusicObj.GetComponent<AudioSource>().Play();
+                MusicObj.GetComponent<AudioSource>().Play();
+                StartCoroutine(AudioPlayFinished(MusicObj.GetComponent<AudioSource>().clip.length));
             }
         }
     }
@@ -137,16 +144,16 @@ public class GameSystem : MonoBehaviour
             SceneManager.LoadScene("Menu");
         }
 
-        if(!isMusicStart) //第一個打擊物件時間點小於兩秒，音樂需延後播放
-        {
-            if(total_time*1000>=wait_time)
-            {
-                isMusicStart=true;
-                //play music
-                MusicObj.GetComponent<AudioSource>().Play();
-                StartCoroutine(AudioPlayFinished(MusicObj.GetComponent<AudioSource>().clip.length));
-            }
-        }
+        // if(!isMusicStart) //第一個打擊物件時間點小於兩秒，音樂需延後播放
+        // {
+        //     if(total_time*1000>=wait_time)
+        //     {
+        //         isMusicStart=true;
+        //         //play music
+        //         MusicObj.GetComponent<AudioSource>().Play();
+        //         StartCoroutine(AudioPlayFinished(MusicObj.GetComponent<AudioSource>().clip.length));
+        //     }
+        // }
         if(isMapDone && !isMusicDone) //是否結束的判定
             return;
         else if(isMapDone && isMusicDone)
@@ -161,4 +168,5 @@ public class GameSystem : MonoBehaviour
             setNextObj();
         }
     }
+
 }

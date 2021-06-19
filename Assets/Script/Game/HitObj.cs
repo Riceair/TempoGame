@@ -11,20 +11,25 @@ public class HitObj : MonoBehaviour
     private const int BLUE_CODE=2;
     private float speed;
 
-    private GameObject RedHitSound, BlueHitSound, HitNum, MissNum;
+    public GameObject Perfect, Miss;
+
+    private GameObject RedHitSound, BlueHitSound, HitNum, MissNum, HitRecall, RecallObj, GameSystem;
 
     // Start is called before the first frame update
     void Start()
-    {
+    { 
         Vector3 generate_position = GameObject.Find("GeneratePoint").transform.position;
         Vector3 hit_position = GameObject.Find("HitPosition").transform.position;
         float distance = Vector3.Distance(generate_position,hit_position);
-        speed = distance/2f; //距離除以時間(秒)
+        speed = distance/1.16f; //距離除以時間(秒)
 
         RedHitSound = GameObject.Find("RedHitSound");
         BlueHitSound = GameObject.Find("BlueHitSound");
         HitNum = GameObject.Find("HitNum");
         MissNum = GameObject.Find("MissNum");
+        HitRecall = GameObject.Find("HitRecall");
+
+        GameSystem = GameObject.Find("GameSystem");
 
         if(name=="HitObj_R(Clone)")
             myCode=RED_CODE;
@@ -50,6 +55,7 @@ public class HitObj : MonoBehaviour
             }
             else
                 recordScore(false);
+            StartCoroutine(WaitToDel());
             Destroy(gameObject);
         }
         else if(other.name=="HitBlue")
@@ -61,6 +67,7 @@ public class HitObj : MonoBehaviour
             }
             else
                 recordScore(false);
+            StartCoroutine(WaitToDel());
             Destroy(gameObject);
         }
     }
@@ -72,20 +79,28 @@ public class HitObj : MonoBehaviour
         {
             num = Convert.ToInt32(MissNum.GetComponent<Text>().text) + 1;
             MissNum.GetComponent<Text>().text = Convert.ToString(num);
+            RecallObj = Instantiate(Miss, HitRecall.transform.position, transform.rotation);
         }
         else
         {
             num = Convert.ToInt32(HitNum.GetComponent<Text>().text) + 1;
             HitNum.GetComponent<Text>().text = Convert.ToString(num);
+            RecallObj = Instantiate(Perfect, HitRecall.transform.position, transform.rotation);
         }
+    }
+
+    private IEnumerator WaitToDel()
+    {
+        yield return new WaitForSeconds(3);
     }
 
     void OnTriggerEnter(Collider other)
     {
         if(other.name=="DestroyPoint")
         {
-            Destroy(gameObject);
             recordScore(false);
+            StartCoroutine(WaitToDel());
+            Destroy(gameObject);
         }
         CheckTrigger(other);
     }
